@@ -617,7 +617,7 @@ function openSettings(first) {
     </div>
     <div class="hint">Bez tokena notatki zapisują się tylko na tym urządzeniu. Z tokenem są wspólne dla komputera i telefonu.</div>
     <div class="sheet-actions">
-      ${ghReady() ? `<button class="btn ghost" id="btn-pair">Połącz telefon (kod QR)</button>` : ""}
+      ${ghReady() ? `<button class="btn ghost" id="btn-pair">Połącz telefon lub komputer</button>` : ""}
       <span class="spacer"></span>
       ${first ? "" : `<button class="btn ghost" data-close>Anuluj</button>`}
       <button class="btn" id="save-settings">Zapisz</button>
@@ -640,11 +640,12 @@ function openPair() {
   const payload = b64encode(JSON.stringify({ u: c.user, o: c.owner, r: c.repo, t: c.token, g: c.goal })).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   const link = location.origin + location.pathname + "#setup=" + payload;
   openSheet(`
-    <div class="sheet-head"><div><h2>Połącz telefon</h2><div class="sheet-sub">Zeskanuj aparatem w telefonie</div></div><button class="close" data-close aria-label="Zamknij">×</button></div>
+    <div class="sheet-head"><div><h2>Połącz urządzenie</h2><div class="sheet-sub">Telefon: zeskanuj kod aparatem</div></div><button class="close" data-close aria-label="Zamknij">×</button></div>
     <div class="qr" id="qr"></div>
     <ol class="steps"><li>Otwórz aparat w telefonie i nakieruj go na kod.</li><li>Kliknij link, który się pojawi. Aplikacja ustawi się sama.</li><li>W przeglądarce telefonu wybierz „Dodaj do ekranu głównego”.</li></ol>
-    <div class="hint">Nie pokazuj tego kodu nikomu. Daje dostęp do Twoich notatek.</div>
-    <div class="sheet-actions"><button class="btn" data-close>Gotowe</button></div>
+    <div class="field"><label for="pair-link">Na komputerze: otwórz ten link w przeglądarce</label><input id="pair-link" readonly value="${esc(link)}"></div>
+    <div class="hint">Nie pokazuj tego kodu ani linku nikomu. Dają dostęp do notatek.</div>
+    <div class="sheet-actions"><button class="btn ghost" id="copy-link">Kopiuj link</button><span class="spacer"></span><button class="btn" data-close>Gotowe</button></div>
   `);
   try { new QRCode($("#qr"), { text: link, width: 240, height: 240, correctLevel: QRCode.CorrectLevel.L }); }
   catch { $("#qr").outerHTML = `<div class="code">${esc(link)}</div>`; }
@@ -668,6 +669,7 @@ document.addEventListener("click", e => {
     case "save-ach": { const ti = $("#a-title").value.trim(); if (!ti) return $("#a-title").focus(); const a = { id: uid(), title: ti, date: $("#a-date").value, desc: $("#a-desc").value.trim(), updatedAt: now() }; S.data.achievements[a.id] = a; markDirty(); closeSheet(); renderAll(); toast("Osiągnięcie dodane"); return; }
     case "save-settings": return saveSettings();
     case "btn-pair": return openPair();
+    case "copy-link": { const i = $("#pair-link"); navigator.clipboard?.writeText(i.value).then(() => toast("Link skopiowany"), () => { i.select(); toast("Zaznaczono link, skopiuj Ctrl+C"); }) ?? (i.select(), toast("Zaznaczono link, skopiuj Ctrl+C")); return; }
     case "btn-settings": return openSettings(false);
     case "fab": return openQuick();
     case "btn-add-ach": return openAch();
