@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Promocja 1500</title>
-<meta name="theme-color" content="#0f1420">
+<meta name="theme-color" content="#302e2b">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Promocja 1500">
@@ -13,45 +13,44 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
-<link rel="stylesheet" href="style.css?v=3">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap">
+<link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
 
 <div class="app">
-  <!-- LEWA KOLUMNA: droga piona -->
+  <!-- LEWA KOLUMNA -->
   <aside class="hero" id="hero">
     <div class="hero-top">
       <div class="who">
         <img id="avatar" class="avatar" alt="" hidden>
-        <div>
-          <div class="eyebrow">Rapid · chess.com</div>
+        <div class="who-text">
           <div class="nick" id="nick">—</div>
+          <div class="who-sub"><span class="clock-ico" aria-hidden="true"></span>Rapid</div>
         </div>
       </div>
       <button class="icon-btn" id="btn-settings" aria-label="Ustawienia">
-        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7Zm8.6-2.6.1-.9-.1-.9 2-1.6-2-3.4-2.4 1a7.4 7.4 0 0 0-1.6-.9L16.2 3h-4l-.4 2.6c-.6.2-1.1.5-1.6.9l-2.4-1-2 3.4 2 1.6-.1.9.1.9-2 1.6 2 3.4 2.4-1c.5.4 1 .7 1.6.9l.4 2.6h4l.4-2.6c.6-.2 1.1-.5 1.6-.9l2.4 1 2-3.4-2-1.6Z"/></svg>
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7Zm8.6-2.6.1-.9-.1-.9 2-1.6-2-3.4-2.4 1a7.4 7.4 0 0 0-1.6-.9L16.2 3h-4l-.4 2.6c-.6.2-1.1.5-1.6.9l-2.4-1-2 3.4 2 1.6-.1.9.1.9-2 1.6 2 3.4 2.4-1c.5.4 1 .7 1.6.9l.4 2.6h4l.4-2.6c.6-.2 1.1-.5 1.6-.9l2.4 1 2-3.4-2-1.6Z"/></svg>
       </button>
     </div>
 
-    <div class="rating-block">
+    <div class="rating-row">
       <div class="rating" id="rating">—</div>
-      <div class="rating-side">
-        <div class="to-go" id="to-go">wczytywanie…</div>
-        <div class="record" id="record"></div>
+      <div class="week" id="week"></div>
+    </div>
+    <div class="to-go" id="to-go">wczytywanie…</div>
+
+    <div class="road">
+      <div class="road-title">Droga do promocji</div>
+      <div class="file-wrap">
+        <div class="file" id="file" aria-label="Postęp do celu"></div>
+        <div class="hero-stats" id="hero-stats"></div>
       </div>
     </div>
 
-    <div class="file-wrap">
-      <div class="file" id="file" aria-label="Postęp do celu"></div>
-      <div class="file-legend">
-        <span>Pion idzie naprzód razem z rankingiem. Ostatnie pole to promocja, czyli <b id="goal-label">1500</b>.</span>
-      </div>
-    </div>
-
-    <div class="focus" id="focus-card">
-      <div class="eyebrow">Teraz skupiam się na</div>
-      <div class="focus-text" id="focus-text">Kliknij, żeby wpisać jeden konkretny cel na najbliższe partie.</div>
+    <div class="focus" id="focus-card" role="button" tabindex="0">
+      <div class="focus-label">Teraz skupiam się na</div>
+      <div class="focus-text" id="focus-text">Kliknij, żeby wpisać jeden cel na najbliższe partie.</div>
     </div>
 
     <div class="sync-line" id="sync-line"></div>
@@ -60,7 +59,7 @@
   <!-- PRAWA KOLUMNA -->
   <main class="main">
     <nav class="tabs" id="tabs" role="tablist">
-      <button role="tab" data-view="partie" class="tab is-active">Partie</button>
+      <button role="tab" data-view="partie" class="tab is-active">Start</button>
       <button role="tab" data-view="postepy" class="tab">Postępy</button>
       <button role="tab" data-view="otwarcia" class="tab">Otwarcia</button>
       <button role="tab" data-view="praca" class="tab">Do poprawy</button>
@@ -69,25 +68,26 @@
     <div class="banner" id="banner" hidden></div>
 
     <section class="view is-active" id="view-partie">
+      <div id="wins"></div>
       <div id="drafts"></div>
       <div class="view-head">
-        <h2>Partie Rapid</h2>
-        <button class="btn ghost small" id="btn-refresh">Odśwież</button>
+        <h2>Ostatnie partie</h2>
+        <button class="btn grey small" id="btn-refresh">Odśwież</button>
       </div>
       <div class="games" id="games"></div>
-      <button class="btn ghost wide" id="btn-more" hidden>Wczytaj starsze miesiące</button>
+      <button class="btn grey wide" id="btn-more" hidden>Wczytaj starsze miesiące</button>
     </section>
 
     <section class="view" id="view-postepy">
       <div class="view-head"><h2>Ranking w czasie</h2><span class="muted small" id="chart-range"></span></div>
-      <div class="chart-card"><div id="chart"></div></div>
+      <div class="card chart-card"><div id="chart"></div></div>
       <div class="view-head"><h2>Kamienie milowe</h2></div>
       <div class="milestones" id="milestones"></div>
       <div class="view-head">
-        <h2>Moje osiągnięcia</h2>
-        <button class="btn ghost small" id="btn-add-ach">+ Dodaj</button>
+        <h2>Wszystkie osiągnięcia</h2>
+        <button class="btn green small" id="btn-add-ach">+ Dodaj swoje</button>
       </div>
-      <div class="achievements" id="achievements"></div>
+      <div class="badges" id="achievements"></div>
     </section>
 
     <section class="view" id="view-otwarcia">
@@ -126,7 +126,7 @@
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="config.js?v=3"></script>
-<script src="app.js?v=3"></script>
+<script src="config.js?v=4"></script>
+<script src="app.js?v=4"></script>
 </body>
 </html>

@@ -324,37 +324,127 @@ function attachDraftTo(d, g, silent) {
 }
 
 /* ================= Renderowanie ================= */
-const PAWN = `<svg class="pawn" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2.4a3.4 3.4 0 0 0-2.1 6.1c-1 .6-1.6 1.4-1.6 2.3h2.1c-.3 2.6-1.5 4.6-3.4 6.1V19h10v-2.1c-1.9-1.5-3.1-3.5-3.4-6.1h2.1c0-.9-.6-1.7-1.6-2.3A3.4 3.4 0 0 0 12 2.4ZM5.4 20h13.2v1.8H5.4z"/></svg>`;
+const PAWN = `<svg class="pawn" viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" stroke="#3a3836" stroke-width="1.3" stroke-linejoin="round" d="M12 2.4a3.4 3.4 0 0 0-2.1 6.1c-1 .6-1.6 1.4-1.6 2.3h2.1c-.3 2.6-1.5 4.6-3.4 6.1V19h10v-2.1c-1.9-1.5-3.1-3.5-3.4-6.1h2.1c0-.9-.6-1.7-1.6-2.3A3.4 3.4 0 0 0 12 2.4ZM5.4 20h13.2v1.8H5.4z"/></svg>`;
+const QUEEN = `<svg class="pawn" viewBox="0 0 24 24" aria-hidden="true"><path fill="#ffc23d" stroke="#3a3836" stroke-width="1.3" stroke-linejoin="round" d="M3 7l4.5 4L12 4l4.5 7L21 7l-2 11H5L3 7Zm2 13h14v2H5z"/></svg>`;
+
+/* Ikony medali */
+const ICONS = {
+  flame: "M12 22c-4.4 0-7-3-7-6.8 0-3.6 2.6-5.6 4-7.7.9-1.4 1.3-3 1.2-5.5 3 1.6 5 4.4 5.3 7.2.6-.6 1-1.5 1.1-2.6 1.7 1.7 2.4 4 2.4 6.1C19 19 16.4 22 12 22Zm0-2c1.7 0 3-1.2 3-3 0-1.4-.9-2.4-1.8-3.4-.3 1-.9 1.6-1.7 1.9.2-1.5-.2-2.7-1-3.6C9.7 13.5 9 14.8 9 17c0 1.8 1.3 3 3 3Z",
+  trophy: "M7 3h10v2h3v3a4 4 0 0 1-4 4h-.3A5 5 0 0 1 13 14.9V17h3v2H8v-2h3v-2.1A5 5 0 0 1 8.3 12H8a4 4 0 0 1-4-4V5h3V3Zm-1 4v1a2 2 0 0 0 2 2V7H6Zm12 0h-2v3a2 2 0 0 0 2-2V7ZM7 20h10v2H7z",
+  crown: "M3 7l4.5 4L12 4l4.5 7L21 7l-2 11H5L3 7Zm2 13h14v2H5z",
+  target: "M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20Zm0 3a7 7 0 1 0 0 14 7 7 0 0 0 0-14Zm0 3a4 4 0 1 1 0 8 4 4 0 0 1 0-8Zm0 2.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z",
+  shield: "M12 2l8 3v6c0 5-3.4 9.3-8 11-4.6-1.7-8-6-8-11V5l8-3Zm0 5l1.5 3 3.3.5-2.4 2.3.6 3.2L12 14.5 9 16l.6-3.2-2.4-2.3 3.3-.5L12 7Z",
+  up: "M4 18l5.5-5.5 4 4L20 10v4h2V6.5h-7.5v2h4L13.5 13.5l-4-4L2.5 16.5z",
+  bolt: "M13 2L4 14h7l-1 8 9-12h-7l1-8Z",
+  king: "M11 2h2v2h2v2h-2v2.1a4 4 0 0 1 3 3.9c0 1.4-.7 2.6-1.8 3.3L15 18H9l-.2-2.7A4 4 0 0 1 8 12a4 4 0 0 1 3-3.9V6H9V4h2V2ZM7 19h10v3H7z",
+  star: "M12 2l3 6.3 6.9.9-5 4.8 1.2 6.9L12 17.6 5.9 20.9 7.1 14l-5-4.8 6.9-.9z",
+  board: "M3 3h18v18H3V3Zm2 2v4h4V5H5Zm4 4v4h4V9H9Zm4-4v4h4V5h-4Zm4 4v4h2V9h-2ZM5 13v4h4v-4H5Zm8 0v4h4v-4h-4Zm-4 4v2h4v-2H9Zm8 0v2h2v-2h-2ZM5 19v0Z"
+};
+const MEDAL_COLORS = {
+  gold: ["#ffe27a", "#f2a516", "#a86a00"], orange: ["#ffb36b", "#f2611d", "#a8360a"], green: ["#c6ef8f", "#6fae37", "#3c6b1c"],
+  blue: ["#9fd4ff", "#3b8be6", "#1d4f99"], purple: ["#dcb6ff", "#8c55e6", "#53289c"], red: ["#ffa7a0", "#e5483b", "#93231a"]
+};
+let medalN = 0;
+function medal(icon, color, cls = "medal") {
+  const [a, b, c] = MEDAL_COLORS[color] || MEDAL_COLORS.gold; const id = "m" + (++medalN);
+  return `<svg class="${cls}" viewBox="0 0 64 64" aria-hidden="true">
+    <defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient></defs>
+    <path d="M32 3l25 14.5v29L32 61 7 46.5v-29z" fill="${c}"/>
+    <path d="M32 6.5l22 12.7v25.6L32 57.5 10 44.8V19.2z" fill="url(#${id})"/>
+    <path d="M32 6.5l22 12.7v6L32 12.5 10 25.2v-6z" fill="#fff" opacity=".25"/>
+    <g transform="translate(17 17) scale(1.25)"><path d="${ICONS[icon]}" fill="#fff" fill-rule="evenodd" stroke="${c}" stroke-width=".6" paint-order="stroke"/></g>
+  </svg>`;
+}
+const plural = (n, one, few, many) => n === 1 ? one : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14)) ? few : many;
+
+function weekGain() {
+  const rated = S.games.filter(g => g.rated); if (rated.length < 2) return null;
+  const since = now() - 7 * 86400e3;
+  const before = [...rated].reverse().find(g => g.end < since);
+  const inWeek = rated.filter(g => g.end >= since);
+  if (!inWeek.length || !before) return null;
+  return inWeek[inWeek.length - 1].myRating - before.myRating;
+}
+
+// Sukcesy liczone z partii + wpisane ręcznie. prio: im wyżej, tym ważniejsze na Start.
+function computeWins() {
+  const out = [], G = S.games, rated = G.filter(g => g.rated);
+  let cur = 0; for (let i = G.length - 1; i >= 0 && G[i].res === "win"; i--) cur++;
+  if (cur >= 2) out.push({ prio: 100, icon: "flame", color: "orange", kicker: "Gorąca seria", title: `${cur} ${plural(cur, "wygrana", "wygrane", "wygranych")} z rzędu!`, sub: "Seria trwa. Graj dalej tak samo." });
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const winsToday = G.filter(g => g.end >= today.getTime() && g.res === "win").length;
+  if (winsToday) out.push({ prio: 90, icon: "bolt", color: "blue", kicker: "Dzisiaj", title: `${winsToday} ${plural(winsToday, "wygrana", "wygrane", "wygranych")} dzisiaj`, sub: "Dobry dzień przy szachownicy." });
+  const wg = weekGain();
+  if (wg != null && wg > 0) out.push({ prio: 85, icon: "up", color: "green", kicker: "Ostatnie 7 dni", title: `+${wg} pkt w tym tygodniu`, sub: "Ranking idzie w górę." });
+  let best = 0, run = 0, bestEnd = null; for (const g of G) { if (g.res === "win") { run++; if (run > best) { best = run; bestEnd = g.end; } } else run = 0; }
+  if (best >= 3) out.push({ prio: 60, icon: "flame", color: "red", kicker: "Rekordowa seria", title: `${best} ${plural(best, "wygrana", "wygrane", "wygranych")} z rzędu`, sub: fmtDateY(bestEnd) });
+  const wins = G.filter(g => g.res === "win");
+  if (wins.length) { const b = wins.reduce((a, g) => g.oppRating > a.oppRating ? g : a); out.push({ prio: 70, icon: "shield", color: "purple", kicker: "Największy skalp", title: `Pokonany gracz z rankingiem ${b.oppRating}`, sub: `${b.opp} · ${fmtDateY(b.end)}`, game: b.id }); }
+  if (rated.length) { const p = rated.reduce((a, g) => g.myRating > a.myRating ? g : a); out.push({ prio: 65, icon: "crown", color: "gold", kicker: "Rekord rankingu", title: `Najwyżej: ${p.myRating}`, sub: fmtDateY(p.end) }); }
+  const accs = G.filter(g => g.acc != null && g.res !== "loss");
+  if (accs.length) { const a = accs.reduce((x, g) => g.acc > x.acc ? g : x); out.push({ prio: 55, icon: "target", color: "green", kicker: "Snajper", title: `Celność ${Math.round(a.acc)}%`, sub: `vs ${a.opp} · ${fmtDateY(a.end)}`, game: a.id }); }
+  const mates = wins.filter(g => g.reason === "mat").length;
+  if (mates) out.push({ prio: 50, icon: "king", color: "gold", kicker: "Matujący", title: `${mates} ${plural(mates, "wygrana", "wygrane", "wygranych")} przez mata`, sub: "w wczytanych miesiącach" });
+  const goal = cfg().goal, curR = current();
+  if (curR != null) { const passed = Math.floor(Math.min(curR, goal) / 100) * 100; if (passed >= 100) out.push({ prio: 45, icon: "trophy", color: "gold", kicker: "Próg", title: `Ponad ${passed}`, sub: `Następny cel: ${Math.min(passed + 100, goal)}` }); }
+  if (wins.length) out.push({ prio: 40, icon: "board", color: "blue", kicker: "Wygrane", title: `${wins.length} ${plural(wins.length, "wygrana", "wygrane", "wygranych")}`, sub: "w wczytanych miesiącach" });
+  for (const a of Object.values(S.data.achievements).filter(a => !a.deleted)) {
+    const t = a.date ? new Date(a.date).getTime() : a.updatedAt;
+    out.push({ prio: now() - t < 3 * 86400e3 ? 95 : 75, icon: "star", color: "purple", kicker: "Moje osiągnięcie", title: a.title, sub: (a.date ? fmtDateY(t) : "") + (a.desc ? " · " + a.desc : ""), manual: a.id, t });
+  }
+  return out.sort((a, b) => b.prio - a.prio);
+}
+function badgeHtml(w) {
+  const tag = w.game ? `button class="badge" data-game="${w.game}"` : `div class="badge"`;
+  return `<${tag}>${medal(w.icon, w.color)}<div><div class="b-title">${esc(w.title)}</div><div class="b-sub">${esc(w.kicker)}${w.sub ? " · " + esc(w.sub) : ""}</div></div>${w.manual ? `<button class="b-del" data-delach="${w.manual}" aria-label="Usuń osiągnięcie">×</button>` : ""}</${w.game ? "button" : "div"}>`;
+}
+function renderWins() {
+  const box = $("#wins"); if (!box) return;
+  const list = computeWins();
+  if (!list.length) { box.innerHTML = ""; return; }
+  const top = list[0], rest = list.slice(1, 7);
+  box.innerHTML = `
+    <div class="wins-hero">${medal(top.icon, top.color, "medal-xl")}
+      <div><div class="wins-kicker">${esc(top.kicker)}</div><div class="wins-title">${esc(top.title)}</div><div class="wins-sub">${esc(top.sub || "")}</div></div>
+    </div>
+    <div class="badges">${rest.map(badgeHtml).join("")}</div>
+    ${list.length > 7 ? `<div class="wins-more"><button class="linkbtn" data-goto="postepy">Wszystkie osiągnięcia →</button></div>` : ""}`;
+}
 
 function renderHero() {
   const c = cfg(), cur = current(), goal = c.goal;
   $("#nick").textContent = S.profile?.username || c.user || (DEMO ? "przykład" : "—");
   const av = $("#avatar"); if (S.profile?.avatar) { av.src = S.profile.avatar; av.hidden = false; } else av.hidden = true;
   $("#rating").textContent = cur ?? "—";
-  $("#goal-label").textContent = goal;
+  const wg = weekGain(), wk = $("#week");
+  wk.className = "week up";
+  wk.textContent = wg > 0 ? "▲ +" + wg + " w 7 dni" : "";
   const togo = $("#to-go");
   if (cur == null) togo.textContent = S.loading ? "wczytywanie…" : "brak partii Rapid";
-  else if (cur >= goal) togo.textContent = "Cel osiągnięty! Promocja!";
-  else togo.textContent = `brakuje ${goal - cur} pkt do ${goal}`;
-  const rec = S.stats?.chess_rapid?.record;
-  const best = S.stats?.chess_rapid?.best?.rating;
-  $("#record").textContent = rec ? `W ${rec.win} · R ${rec.draw} · P ${rec.loss}${best ? " · rekord " + best : ""}` : "";
+  else if (cur >= goal) togo.innerHTML = "<b>Cel osiągnięty! Promocja!</b>";
+  else togo.innerHTML = `Do <b>${goal}</b> brakuje <b>${goal - cur}</b> pkt`;
 
-  // Kolumna piona: pole 2 = start, pole 8 = cel
+  const rec = S.stats?.chess_rapid?.record, bestR = S.stats?.chess_rapid?.best?.rating;
+  const st = [];
+  if (bestR) st.push(["Rekord", bestR, "gold"]);
+  if (rec) st.push(["Bilans", `${rec.win}W ${rec.draw}R ${rec.loss}P`, ""]);
+  if (rec) { const n = rec.win + rec.draw + rec.loss; if (n) st.push(["Wygrane", Math.round(rec.win / n * 100) + "%", ""]); }
+  $("#hero-stats").innerHTML = st.map(([k, v, cl]) => `<div class="hstat"><span class="k">${k}</span><span class="v ${cl}">${esc(v)}</span></div>`).join("");
+
+  // Pole 2 = start, pole 8 = cel
   const start = Math.min(startRating() ?? goal, goal - 1);
   const frac = cur == null ? 0 : clamp((cur - start) / (goal - start), 0, 1);
   const pawnRank = cur != null && cur >= goal ? 8 : 2 + Math.floor(frac * 6);
   let html = "";
   for (let r = 8; r >= 1; r--) {
-    const val = r >= 2 ? Math.round((start + (goal - start) * (r - 2) / 6) / 10) * 10 : null;
-    const lbl = r === 8 ? goal : r === 2 ? start : val;
-    html += `<div class="cell${r <= pawnRank && r >= 2 ? " reached" : ""}${r === 8 ? " goal" : ""}">${r === pawnRank ? PAWN.replace('class="pawn"', `class="pawn${pawnRank === 8 ? " queen" : ""}"`) : ""}${lbl != null ? `<span class="lbl">${lbl}</span>` : ""}</div>`;
+    const lbl = r === 8 ? goal : r === 2 ? start : r >= 2 ? Math.round((start + (goal - start) * (r - 2) / 6) / 10) * 10 : null;
+    html += `<div class="cell${r <= pawnRank && r >= 2 ? " reached" : ""}${r === 8 ? " goal" : ""}">${r === pawnRank ? (pawnRank === 8 ? QUEEN : PAWN) : ""}${lbl != null ? `<span class="lbl">${lbl}</span>` : ""}</div>`;
   }
   $("#file").innerHTML = html;
 
   const f = S.data.focus && !S.data.focus.deleted && S.data.focus.text ? S.data.focus.text : "";
   $("#focus-card").classList.toggle("empty", !f);
-  $("#focus-text").textContent = f || "Kliknij, żeby wpisać jeden konkretny cel na najbliższe partie.";
+  $("#focus-text").textContent = f || "Kliknij, żeby wpisać jeden cel na najbliższe partie.";
 }
 
 function resLabel(g) { return { win: "Wygrana", loss: "Przegrana", draw: "Remis" }[g.res]; }
@@ -365,7 +455,7 @@ function renderDrafts() {
   const recent = S.games.slice(-5).reverse();
   $("#drafts").innerHTML = ds.length ? `<div class="drafts">${ds.map(d => `
     <div class="draft">
-      <div class="draft-head"><span>Notatka czeka na partię · ${fmtDate(d.createdAt)} ${fmtTime(d.createdAt)}</span></div>
+      <div class="draft-head">Notatka czeka na partię · ${fmtDate(d.createdAt)} ${fmtTime(d.createdAt)}</div>
       <div class="draft-text">${esc(d.text)}</div>
       <div class="draft-actions">
         ${recent.length ? `<select class="chip" data-attach="${d.id}" aria-label="Przypnij do partii"><option value="">Przypnij do partii…</option>${recent.map(g => `<option value="${g.id}">${esc(g.opp)} · ${resLabel(g)} · ${fmtTime(g.end)}</option>`).join("")}</select>` : ""}
@@ -375,6 +465,7 @@ function renderDrafts() {
 }
 
 function renderGames() {
+  renderWins();
   renderDrafts();
   const box = $("#games");
   const banner = $("#banner");
@@ -393,9 +484,9 @@ function renderGames() {
     const n = note(g.id);
     const summary = n ? (n.why || n.work || n.good || n.live || "") : "";
     html += `<button class="game ${g.res}" data-game="${g.id}">
-      <span class="stripe"></span>
+      <span class="res-ico" aria-hidden="true">${g.res === "win" ? "+" : g.res === "loss" ? "−" : "="}</span>
       <span class="g-main">
-        <span class="g-line1"><span class="piece ${g.color}" title="${g.color === "white" ? "Białe" : "Czarne"}"></span><span class="g-opp">${esc(g.opp)}</span><span class="g-opp-r">${g.oppRating}</span></span>
+        <span class="g-line1"><span class="piece ${g.color}" title="${g.color === "white" ? "Białe" : "Czarne"}"></span><span class="g-opp">${esc(g.opp)}</span><span class="g-opp-r">(${g.oppRating})</span></span>
         <span class="g-open">${esc(n?.myOpening || g.opening || "Otwarcie nieznane")}${g.eco ? " · " + esc(g.eco) : ""}</span>
         <span class="g-meta">${fmtDate(g.end)} ${fmtTime(g.end)} · ${esc(g.reason || "")}${g.acc != null ? " · celność " + Math.round(g.acc) + "%" : ""}</span>
       </span>
@@ -411,39 +502,68 @@ function renderChart() {
   const pts = S.games.filter(g => g.rated);
   const el = $("#chart"), goal = cfg().goal;
   if (pts.length < 2) { el.innerHTML = `<div class="empty-note" style="padding:20px">Wykres pojawi się po co najmniej dwóch partiach.</div>`; $("#chart-range").textContent = ""; return; }
-  const W = 720, H = 280, L = 46, R = 58, T = 16, B = 30;
+  const W = 760, H = 300, L = 48, R = 60, T = 18, B = 34;
   const vals = pts.map(p => p.myRating);
   let lo = Math.min(...vals) - 25, hi = Math.max(goal, ...vals) + 25;
   lo = Math.floor(lo / 50) * 50; hi = Math.ceil(hi / 50) * 50;
   const x = i => L + (W - L - R) * (i / (pts.length - 1));
   const y = v => T + (H - T - B) * (1 - (v - lo) / (hi - lo));
-  const step = (hi - lo) > 500 ? 200 : 100;
+  const step = (hi - lo) > 800 ? 200 : 100;
   let grid = "";
   for (let v = Math.ceil(lo / step) * step; v <= hi; v += step) {
-    if (v === goal) continue;
-    grid += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="var(--muted)" font-family="var(--f-mono)">${v}</text>`;
+    if (Math.abs(v - goal) < step / 3) continue;
+    grid += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${L - 8}" y="${y(v) + 5}" text-anchor="end" font-size="13" font-weight="800" fill="var(--muted)">${v}</text>`;
   }
-  // Etykiety miesięcy
-  let months = "", lastM = -1;
-  pts.forEach((p, i) => { const d = new Date(p.end); const m = d.getMonth(); if (m !== lastM) { lastM = m; months += `<text x="${x(i)}" y="${H - 8}" font-size="11" fill="var(--muted)" font-family="var(--f-mono)" text-anchor="${i === 0 ? "start" : "middle"}">${d.toLocaleDateString("pl-PL", { month: "short" })}</text><line x1="${x(i)}" x2="${x(i)}" y1="${H - B}" y2="${H - B + 4}" stroke="var(--line)"/>`; } });
+  // Etykiety miesięcy: tylko gdy jest miejsce, styczeń z rokiem
+  let months = "", lastM = -1, lastX = -999;
+  pts.forEach((p, i) => {
+    const d = new Date(p.end), m = d.getFullYear() * 12 + d.getMonth();
+    if (m === lastM) return; lastM = m;
+    if (x(i) - lastX < 56) return; lastX = x(i);
+    const lbl = d.toLocaleDateString("pl-PL", { month: "short" }) + (d.getMonth() === 0 || i === 0 ? " " + String(d.getFullYear()).slice(2) : "");
+    months += `<line x1="${x(i)}" x2="${x(i)}" y1="${H - B}" y2="${H - B + 5}" stroke="var(--muted)"/><text x="${x(i)}" y="${H - 10}" font-size="13" font-weight="800" fill="var(--muted)" text-anchor="${i === 0 ? "start" : "middle"}">${lbl}</text>`;
+  });
   const line = pts.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p.myRating).toFixed(1)}`).join("");
   const area = `${line}L${x(pts.length - 1)},${H - B}L${x(0)},${H - B}Z`;
   const last = pts[pts.length - 1];
-  const dots = pts.length <= 80 ? pts.map((p, i) => `<circle cx="${x(i)}" cy="${y(p.myRating)}" r="2.2" fill="${p.res === "win" ? "var(--win)" : p.res === "loss" ? "var(--loss)" : "var(--draw)"}"/>`).join("") : "";
-  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Ranking Rapid w kolejnych partiach">
-    <defs><linearGradient id="ar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--gold)" stop-opacity=".22"/><stop offset="1" stop-color="var(--gold)" stop-opacity="0"/></linearGradient></defs>
+  el.innerHTML = `<div class="chart-wrap"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Ranking Rapid w kolejnych partiach">
+    <defs><linearGradient id="ar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--green)" stop-opacity=".35"/><stop offset="1" stop-color="var(--green)" stop-opacity="0"/></linearGradient></defs>
     ${grid}
-    <line x1="${L}" x2="${W - R}" y1="${y(goal)}" y2="${y(goal)}" stroke="var(--gold)" stroke-dasharray="5 5" stroke-width="1.5"/>
-    <text x="${W - R + 6}" y="${y(goal) + 4}" font-size="12" fill="var(--gold)" font-family="var(--f-mono)" font-weight="600">${goal}</text>
+    <line x1="${L}" x2="${W - R}" y1="${y(goal)}" y2="${y(goal)}" stroke="var(--gold)" stroke-dasharray="6 6" stroke-width="2"/>
+    <text x="${W - R + 6}" y="${y(goal) + 5}" font-size="14" fill="var(--gold)" font-weight="900">${goal}</text>
     <path d="${area}" fill="url(#ar)"/>
-    <path d="${line}" fill="none" stroke="var(--fg)" stroke-width="2" stroke-linejoin="round"/>
-    ${dots}
-    <circle cx="${x(pts.length - 1)}" cy="${y(last.myRating)}" r="5" fill="var(--gold)" stroke="var(--bg)" stroke-width="2"/>
-    <text x="${x(pts.length - 1) + 8}" y="${y(last.myRating) - 8}" font-size="12" fill="var(--fg)" font-family="var(--f-mono)" font-weight="600">${last.myRating}</text>
+    <path d="${line}" fill="none" stroke="var(--green-hi)" stroke-width="2.5" stroke-linejoin="round"/>
+    <circle cx="${x(pts.length - 1)}" cy="${y(last.myRating)}" r="5.5" fill="var(--gold)" stroke="var(--panel)" stroke-width="2"/>
+    <text x="${x(pts.length - 1) + 9}" y="${y(last.myRating) + 5}" font-size="14" fill="var(--fg)" font-weight="900">${last.myRating}</text>
     <line x1="${L}" x2="${W - R}" y1="${H - B}" y2="${H - B}" stroke="var(--line)"/>
     ${months}
-  </svg>`;
-  $("#chart-range").textContent = `${pts.length} partii · od ${fmtDateY(pts[0].end)}`;
+    <g class="cross" visibility="hidden"><line class="cx" y1="${T}" y2="${H - B}" stroke="var(--fg-2)" stroke-dasharray="3 4"/><circle class="cd" r="6" fill="var(--fg)" stroke="var(--panel)" stroke-width="2"/></g>
+    <rect class="hit" x="${L}" y="${T}" width="${W - L - R}" height="${H - T - B}" fill="transparent"/>
+  </svg><div class="tip" hidden></div></div>`;
+  $("#chart-range").textContent = `${pts.length} ${plural(pts.length, "partia", "partie", "partii")} · od ${fmtDateY(pts[0].end)}`;
+
+  // Podpowiedź z datą i rankingiem pod palcem / kursorem
+  const svg = el.querySelector("svg"), tip = el.querySelector(".tip"), cross = el.querySelector(".cross");
+  const move = ev => {
+    const r = svg.getBoundingClientRect();
+    const sx = (ev.clientX - r.left) * W / r.width;
+    const i = clamp(Math.round((sx - L) / (W - L - R) * (pts.length - 1)), 0, pts.length - 1);
+    const p = pts[i], px = x(i), py = y(p.myRating);
+    cross.setAttribute("visibility", "visible");
+    cross.querySelector(".cx").setAttribute("x1", px); cross.querySelector(".cx").setAttribute("x2", px);
+    const cd = cross.querySelector(".cd"); cd.setAttribute("cx", px); cd.setAttribute("cy", py);
+    cd.setAttribute("fill", p.res === "win" ? "var(--win)" : p.res === "loss" ? "var(--loss)" : "var(--fg)");
+    tip.hidden = false;
+    tip.innerHTML = `<div class="t-date">${fmtDateY(p.end)}, ${fmtTime(p.end)}</div><div class="t-r">${p.myRating} <span class="${p.delta > 0 ? "up" : p.delta < 0 ? "down" : ""}">${p.delta == null ? "" : (p.delta > 0 ? "+" : "") + p.delta}</span></div><div class="t-o">${resLabel(p)} vs ${esc(p.opp)} (${p.oppRating})</div>`;
+    const left = px / W * r.width, top = py / H * r.height;
+    const tw = tip.offsetWidth;
+    tip.style.left = clamp(left - tw / 2, 0, r.width - tw) + "px";
+    tip.style.top = Math.max(0, top - tip.offsetHeight - 14) + "px";
+  };
+  const hide = () => { cross.setAttribute("visibility", "hidden"); tip.hidden = true; };
+  svg.addEventListener("pointermove", move);
+  svg.addEventListener("pointerdown", move);
+  svg.addEventListener("pointerleave", hide);
 }
 
 function renderProgress() {
@@ -458,20 +578,8 @@ function renderProgress() {
     ms += `<div class="ms ${done ? "done" : "todo"}"><span class="ms-val">${v}</span><span class="ms-sub">${hit ? "osiągnięte " + fmtDateY(hit.end) : done ? "osiągnięte wcześniej" : cur != null ? "brakuje " + (v - cur) + " pkt" : ""}</span></div>`;
   }
   $("#milestones").innerHTML = ms || `<div class="empty-note">Cel już osiągnięty. Ustaw wyższy w ustawieniach.</div>`;
-
-  // Osiągnięcia automatyczne + wpisane
-  const auto = [];
-  const wins = S.games.filter(g => g.res === "win");
-  if (wins.length) { const b = wins.reduce((a, g) => g.oppRating > a.oppRating ? g : a); auto.push({ m: "↑", t: `Najmocniejszy pokonany rywal: ${b.opp} (${b.oppRating})`, s: fmtDateY(b.end), game: b.id }); }
-  let streak = 0, best = 0, bestEnd = null; for (const g of S.games) { if (g.res === "win") { streak++; if (streak > best) { best = streak; bestEnd = g.end; } } else streak = 0; }
-  if (best >= 2) auto.push({ m: best, t: `Najdłuższa seria wygranych: ${best} z rzędu`, s: fmtDateY(bestEnd) });
-  if (rated.length) { const p = rated.reduce((a, g) => g.myRating > a.myRating ? g : a); auto.push({ m: "★", t: `Najwyższy ranking w tych miesiącach: ${p.myRating}`, s: fmtDateY(p.end) }); }
-  const accs = S.games.filter(g => g.acc != null); if (accs.length) { const a = accs.reduce((x, g) => g.acc > x.acc ? g : x); auto.push({ m: "%", t: `Najlepsza celność: ${Math.round(a.acc)}% (vs ${a.opp})`, s: fmtDateY(a.end), game: a.id }); }
-  const manual = Object.values(S.data.achievements).filter(a => !a.deleted).sort((a, b) => (b.date || "").localeCompare(a.date || ""));
-  $("#achievements").innerHTML =
-    manual.map(a => `<div class="ach"><span class="medal">★</span><div><div class="ach-title">${esc(a.title)}</div><div class="ach-sub">${esc(a.date ? fmtDateY(new Date(a.date).getTime()) : "")}${a.desc ? " · " + esc(a.desc) : ""}</div></div><button class="ach-del" data-delach="${a.id}" aria-label="Usuń osiągnięcie">×</button></div>`).join("") +
-    auto.map(a => `<div class="ach"${a.game ? ` data-game="${a.game}" style="cursor:pointer"` : ""}><span class="medal auto">${esc(a.m)}</span><div><div class="ach-title">${esc(a.t)}</div><div class="ach-sub">${esc(a.s)} · liczone automatycznie</div></div><span></span></div>`).join("") ||
-    `<div class="empty-note">Tu pojawią się Twoje osiągnięcia. Dodaj pierwsze przyciskiem „+ Dodaj”.</div>`;
+  const list = computeWins();
+  $("#achievements").innerHTML = list.length ? list.map(badgeHtml).join("") : `<div class="empty-note">Tu pojawią się osiągnięcia. Dodaj pierwsze przyciskiem „+ Dodaj swoje”.</div>`;
 }
 
 function opStats(games, keyFn) {
@@ -657,6 +765,7 @@ document.addEventListener("click", e => {
   if (t.matches("[data-close]")) return closeSheet();
   if (t.dataset.game && !t.closest(".sheet")) return openGame(t.dataset.game);
   if (t.dataset.game) { closeSheet(); return openGame(t.dataset.game); }
+  if (t.dataset.goto) { document.querySelector(`.tab[data-view="${t.dataset.goto}"]`).click(); window.scrollTo({ top: 0, behavior: "smooth" }); return; }
   if (t.dataset.tag) return t.classList.toggle("on");
   if (t.dataset.fill) { $("#" + t.dataset.fill).value = t.dataset.val; t.remove(); return; }
   if (t.dataset.append) { const ta = $("#q-text"); ta.value = (ta.value ? ta.value.trim() + " " : "") + t.dataset.append; ta.focus(); return; }
@@ -682,6 +791,7 @@ document.addEventListener("click", e => {
   }
 });
 $("#focus-card").addEventListener("click", openFocus);
+$("#focus-card").addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openFocus(); } });
 $("#sheet-backdrop").addEventListener("click", () => { if (cfg().user) closeSheet(); });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("#sheet").hidden && cfg().user) closeSheet(); });
 document.addEventListener("change", e => {
