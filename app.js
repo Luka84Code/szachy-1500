@@ -125,6 +125,14 @@ function pgnMoves(pgn) {
     .replace(/\s+(1-0|0-1|1\/2-1\/2|\*)\s*$/, "").replace(/\s+/g, " ").trim();
   return body;
 }
+// Początek partii z PGN (UTCDate + UTCTime); chess.com nie podaje start_time dla partii na żywo
+function pgnStart(pgn) {
+  const d = pgnTag(pgn, "UTCDate"), t = pgnTag(pgn, "UTCTime");
+  if (!d || !t) return null;
+  const [Y, M, D] = d.split(".").map(Number), [h, m, sec] = t.split(":").map(Number);
+  const ts = Date.UTC(Y, M - 1, D, h, m, sec || 0);
+  return isNaN(ts) ? null : ts;
+}
 function normGame(g, user) {
   if (g.time_class !== "rapid" || (g.rules && g.rules !== "chess")) return null;
   const meWhite = (g.white?.username || "").toLowerCase() === user;
@@ -136,7 +144,7 @@ function normGame(g, user) {
   const op1 = openingFromUrl(ecoUrl);
   const id = String(g.url || "").split("/").pop() || g.uuid || uid();
   return {
-    id, url: g.url, end: (g.end_time || 0) * 1000, color: meWhite ? "white" : "black",
+    id, url: g.url, end: (g.end_time || 0) * 1000, start: pgnStart(g.pgn), color: meWhite ? "white" : "black",
     myRating: me.rating, oppRating: op.rating, opp: op.username, res, reason, rated: g.rated !== false,
     opening: op1.full, family: op1.family, eco: pgnTag(g.pgn, "ECO"),
     acc: g.accuracies ? g.accuracies[meWhite ? "white" : "black"] : null,
@@ -244,7 +252,7 @@ function setSync(state, msg = "") {
 }
 
 /* ================= Wczytywanie partii ================= */
-function monthKey(url) { return "p15:m:" + cfg().user + ":" + url.split("/games/")[1]; }
+function monthKey(url) { return "p15:m2:" + cfg().user + ":" + url.split("/games/")[1]; }
 function isCurrentMonth(url) {
   const [y, m] = url.split("/games/")[1].split("/").map(Number); const d = new Date();
   return y === d.getUTCFullYear() && m === d.getUTCMonth() + 1 || (y === d.getFullYear() && m === d.getMonth() + 1);
@@ -303,11 +311,26 @@ const note = id => { const n = S.data.notes[id]; return n && !n.deleted ? n : nu
 const myOpening = g => (note(g.id)?.myOpening || "").trim() || g.family || "Nieznane";
 const oppOpening = g => (note(g.id)?.oppOpening || "").trim() || g.family || "Nieznane";
 
+// Przypinanie szybkich notatek po czasie:
+// 1) notatka napisana między początkiem a końcem partii (z zapasem 2 min) -> ta partia,
+// 2) notatka napisana do 15 min po końcu partii i w tym czasie nie trwała inna -> ta partia (wnioski tuż po grze).
+//    Regułę 2 stosujemy dopiero po godzinie, żeby nie przypiąć notatki z trwającej partii, której chess.com jeszcze nie pokazał.
+function findGameForDraft(d) {
+  const t = d.createdAt, M = 2 * 60e3;
+  const during = S.games.find(g => g.start != null && t >= g.start - M && t <= g.end + M);
+  if (during) return during;
+  if (now() - t < 3600e3) return null;
+  const before = [...S.games].reverse().find(g => g.end <= t);
+  if (!before || t - before.end > 15 * 60e3) return null;
+  const next = S.games.find(g => g.end > t);
+  if (next && next.start != null && next.start <= t + M) return null;
+  return before;
+}
 function attachDrafts() {
   const drafts = Object.values(S.data.drafts).filter(d => !d.deleted && !d.gameId);
   let changed = false;
   for (const d of drafts) {
-    const g = S.games.find(x => x.end >= d.createdAt && x.end - d.createdAt < 4 * 3600e3);
+    const g = findGameForDraft(d);
     if (g) { attachDraftTo(d, g, true); changed = true; }
   }
   if (changed) markDirty();
@@ -659,7 +682,7 @@ function openGame(id) {
     <div class="field"><label for="f-good">Co zagrałem dobrze</label><textarea id="f-good" placeholder="Nawet w przegranej coś wyszło.">${esc(n.good || "")}</textarea></div>
     <div class="field"><label for="f-work">Nad czym pracować</label><textarea id="f-work" placeholder="Jedna konkretna rzecz na następne partie.">${esc(n.work || "")}</textarea></div>
     <div class="field"><label>Tagi</label><div class="chips" id="f-tags">${chipsHtml(TAGS_BAD, sel)}</div><div class="chips">${chipsHtml(TAGS_GOOD, sel)}</div></div>
-    <div class="field"><label for="f-live">Notatki w trakcie partii</label><textarea id="f-live" placeholder="Tu trafiają szybkie notatki z telefonu.">${esc(n.live || "")}</textarea></div>
+    <div class="field"><label for="f-live">Notatki w trakcie partii</label><textarea id="f-live" class="tall" placeholder="Tu trafiają szybkie notatki z telefonu.">${esc(n.live || "")}</textarea></div>
     <div class="sheet-actions"><button class="btn ghost" data-close>Anuluj</button><button class="btn" id="save-game" data-id="${g.id}">Zapisz notatkę</button></div>
   `);
 }
@@ -675,8 +698,8 @@ function saveGame(id) {
 
 function openQuick() {
   openSheet(`
-    <div class="sheet-head"><div><h2>Szybka notatka</h2><div class="sheet-sub">Pisz w trakcie partii. Przypnie się sama, gdy partia pojawi się z chess.com.</div></div><button class="close" data-close aria-label="Zamknij">×</button></div>
-    <div class="field"><label for="q-text">Co się dzieje?</label><textarea id="q-text" placeholder="np. Zostawiłem skoczka bez obrony w 14. ruchu"></textarea></div>
+    <div class="sheet-head"><div><h2>Szybka notatka</h2><div class="sheet-sub">Pisz w trakcie partii albo tuż po niej. Aplikacja zapamięta godzinę i sama przypnie notatkę do właściwej partii.</div></div><button class="close" data-close aria-label="Zamknij">×</button></div>
+    <div class="field"><label for="q-text">Co się dzieje?</label><textarea id="q-text" class="tall" rows="7" placeholder="np. Zostawiłem skoczka bez obrony w 14. ruchu"></textarea></div>
     <div class="chips">${["Podstawka", "Mało czasu", "Dobry pomysł", "Nie wiem jak grać dalej", "Rywal mnie zaskoczył"].map(t => `<button type="button" class="chip" data-append="${esc(t)}">${esc(t)}</button>`).join("")}</div>
     <div class="sheet-actions"><button class="btn ghost" data-close>Anuluj</button><button class="btn" id="save-quick">Zapisz</button></div>
   `);

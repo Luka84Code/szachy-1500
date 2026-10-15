@@ -304,6 +304,7 @@ button.badge:hover { background: #2e2c29; }
   font-size: 16px; font-weight: 700;
 }
 .field textarea { min-height: 84px; resize: vertical; }
+.field textarea.tall { min-height: 170px; }
 .field input:focus, .field textarea:focus { border-color: var(--green); outline: none; }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .hint { font-size: 14px; color: var(--muted); }
