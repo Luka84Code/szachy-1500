@@ -31,7 +31,7 @@ Token daje dostęp wyłącznie do repozytorium z notatkami. Nie wysyłaj go niko
 
 ### 3. Telefon syna
 
-1. Na komputerze: ikona zębatki → **Połącz telefon (kod QR)**.
+1. Na komputerze: ikona zębatki → **Połącz telefon lub komputer**.
 2. Zeskanuj kod aparatem telefonu i otwórz link. Aplikacja ustawi się sama.
 3. Dodaj ją do ekranu głównego: iPhone (Safari) → Udostępnij → **Do ekranu początk.**, Android (Chrome) → ⋮ → **Dodaj do ekranu głównego**.
 
